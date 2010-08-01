@@ -1,0 +1,4 @@
+
+ln -s Echole/bin/livecoding.pl ~/bin/
+
+autocmd BufWritePost */livecoding/* silent! execute '!livecoding.pl  %'
