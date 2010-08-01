@@ -1,0 +1,25 @@
+
+
+
+#buffers {
+	position: relative;
+	width: 100%;
+	height: 800px;
+}
+
+#buffers #buffer1 {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 50%;
+	height: 100%;
+}
+
+#buffers #buffer2 {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 50%;
+	height: 100%;
+}
+
