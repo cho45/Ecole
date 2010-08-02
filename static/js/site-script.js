@@ -1,6 +1,28 @@
 Deferred.define();
 DMP = new diff_match_patch();
 
+function px(str, parent) {
+	if (!arguments.cache) arguments.cache = {};
+	var match = str.match(/(\d+)(.+)/);
+	if (!match) throw "didn't parse " + str;
+	var n = match[1];
+	var u = match[2];
+	if (arguments.cache[u]) return arguments.cache[u] * n;
+
+	if (!parent) parent = document.body;
+	var tmp = document.createElement('div');
+	var s = tmp.style;
+	s.position = 'absolute';
+	s.display  = 'block';
+	s.width    = 1 + u;
+	parent.appendChild(tmp);
+	var ret = tmp.offsetWidth;
+	parent.removeChild(tmp);
+	arguments.cache[u] = ret;
+	return ret * n;
+}
+
+
 Ecole = {};
 Ecole.API_BASE = '';
 Ecole.get = function (path) {
@@ -28,7 +50,7 @@ Ecole.BufferArea.prototype = {
 				var changes = formatted.changes;
 				for (var i = 0, len = changes.length; i < len; i++) (function (change) {
 					$('<a class="change">L:' + change + '</a> ').click(function () {
-						self.$pre.scrollTop(change * 12);
+						self.$pre.scrollTop(px(change + 'em', self.$pre[0]));
 					}).appendTo(self.$info);
 				})(changes[i]);
 				self.$pre.html(formatted.html);
