@@ -6,6 +6,64 @@ Ecole.get = function (path) {
 	return $.getJSON(Ecole.API_BASE + path);
 };
 
+Ecole.BufferArea = function () { this.init.apply(this, arguments) };
+Ecole.BufferArea.prototype = {
+	init : function (container) {
+		this.$container = $(container);
+		this.$pre       = this.$container.find('pre');
+		this.$info      = this.$container.find('.info');
+		this.$container.data('highlighter', new Ecole.SyntaxHighlighter(this.$pre[0]));
+	},
+
+	update : function (buffer) {
+		var self = this;
+		self.$container.fadeOut('fast', function () {
+			self.$pre.text(
+				'### File: ' + buffer.name + "\n\n" +
+				buffer.body
+			);
+			self.$container.data('highlighter').highlight();
+		});
+		self.$container.fadeIn('fast');
+	}
+};
+
+Ecole.BufferUpdater = {
+	buffers    : [],
+	names      : {},
+	nextUpdate : 0,
+	lastUpdate : 0,
+
+	start : function () {
+		this.buffers.push(new Ecole.BufferArea(document.getElementById('buffer1')));
+		this.buffers.push(new Ecole.BufferArea(document.getElementById('buffer2')));
+		return this.update();
+	},
+	
+	update : function () {
+		var self = this;
+		return Ecole.get('/api/buffer?after=' + self.lastUpdate).next(function (buffers) {
+			buffers.reverse();
+			for (var i = 0, len = buffers.length; i < len; i++) {
+				var buffer = buffers[i];
+				self.lastUpdate = buffer.created_at;
+
+				var area;
+				if (self.names[buffer.name]) {
+					area = self.names[buffer.name];
+					self.nextUpdate = self.buffers.indexOf(self.names[buffer.name]) + 1;
+				} else {
+					area = self.buffers[self.nextUpdate % self.buffers.length];
+					self.nextUpdate = (self.nextUpdate + 1) % 2;
+				}
+				area.update(buffer);
+				self.names[buffer.name] = area;
+			}
+			return wait(1).next(function () { self.update() });
+		});
+	}
+};
+
 Ecole.SyntaxHighlighter = function () { this.init.apply(this, arguments) };
 Ecole.SyntaxHighlighter.StringScanner = function () { this.init.apply(this, arguments) };
 Ecole.SyntaxHighlighter.StringScanner.prototype = {
@@ -218,50 +276,9 @@ Ecole.SyntaxHighlighter.prototype = {
 };
 
 $(function () {
-	var bufferArea  = [$('#buffer1 pre'), $('#buffer2 pre')];
-	var nextUpdate  = 0;
-	var bufferName  = {};
-
-	for (var i = 0, len = bufferArea.length; i < len; i++) {
-		bufferArea[i].data('highlighter', new Ecole.SyntaxHighlighter(bufferArea[i][0]));
-	}
-
-	var last = 0;
-	next(function update () {
-		return Ecole.get('/api/buffer?after=' + last).next(function (buffers) {
-			buffers.reverse();
-			for (var i = 0, len = buffers.length; i < len; i++) {
-				var buffer = buffers[i];
-				last = buffer.created_at;
-
-				if (bufferName[buffer.name]) {
-					var area = bufferName[buffer.name];
-					// console.log(area.scrollTop());
-					updateArea(area, buffer);
-					nextUpdate = bufferArea.indexOf(bufferName[buffer.name]) + 1;
-				} else {
-					var area = bufferArea[nextUpdate % 2];
-					updateArea(area, buffer);
-					nextUpdate = (nextUpdate + 1) % 2;
-				}
-			}
-			return wait(1).next(update);
-
-			function updateArea (area, buffer) {
-				area.fadeOut('fast', function () {
-					area.text(
-						'### File: ' + buffer.name + "\n\n" +
-						buffer.body
-					);
-					area.data('highlighter').highlight();
-				});
-				bufferName[buffer.name] = area;
-				area.fadeIn('fast');
-				return area;
-			}
-		});
-	}).
+	Ecole.BufferUpdater.start().
 	error(function (e) {
 		alert(e);
 	});
 });
+
