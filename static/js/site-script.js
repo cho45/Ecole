@@ -50,7 +50,7 @@ Ecole.BufferArea.prototype = {
 		var line    = 1;
 		for (var i = 0, len = diffs.length; i < len; i++) {
 			var op = diffs[i][0];
-			var dt = diffs[i][1].replace(/[&<>]/g, function (m) { return {'&':'&amp;','<':'&lt;','>':'&gt;'} });
+			var dt = diffs[i][1].replace(/[&<>]/g, function (_) { return {'&':'&amp;','<':'&lt;','>':'&gt;'}[_] });
 			switch (op) {
 				case DIFF_INSERT:
 					if (line > changes[changes.length-1]) changes.push(line);
