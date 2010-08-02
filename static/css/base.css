@@ -1,11 +1,21 @@
 
-
-
 #buffers {
 	position: relative;
 	width: 100%;
-	height: 800px;
+	height: 400px;
+	font-size: 12px;
 }
+
+#buffers .buffer {
+}
+
+#buffers pre {
+	padding: 0 0.5em;
+	overflow: auto;
+	height: 100%;
+	border: 1px solid #ccc;
+}
+
 
 #buffers #buffer1 {
 	position: absolute;
@@ -21,5 +31,107 @@
 	left: 50%;
 	width: 50%;
 	height: 100%;
+}
+
+
+pre.code {
+	color: #666666;
+	background: #efefef;
+}
+
+pre.code .comment {
+	color: #507c6f;
+}
+
+pre.code .string {
+	color: #968258;
+}
+
+pre.code .number {
+	color: #24c3b5;
+}
+
+pre.code .identifer {
+	color: #333333;
+}
+
+pre.code .symbol {
+	color: #479cdb;
+}
+
+pre.code .variable {
+	color: #479cdb;
+}
+
+pre.code .constant {
+	color: #479cdb;
+}
+
+pre.code .special_variable {
+	color: #14779d;
+}
+
+pre.code .keyword {
+	font-weight: bold;
+	color: #4e7585;
+}
+
+pre.code .literal {
+	color: #968258;
+}
+
+pre.code .operator {
+	color: #29845a;
+}
+
+pre.code.lang-css .at_keyword {
+	color: #479cdb;
+}
+
+pre.code.lang-css .important {
+	color: #14779d;
+}
+
+pre.code.lang-xpath .nodetest {
+	color: #479cdb;
+}
+
+pre.code.lang-xpath .axis {
+	color: #24c3b5;
+}
+
+pre.code.lang-xpath .function {
+	color: #479cdb;
+}
+
+pre.code.lang-xpath .qname {
+	color: #968258;
+}
+
+pre.code.lang-xml .cdata {
+	color: #80ac9f;
+}
+
+pre.code.lang-xml .tag {
+	color: #479cdb;
+}
+
+pre.code.lang-xml .pi {
+	color: #80ac9f;
+}
+
+pre.code.lang-xml .dtd {
+	color: #80ac9f;
+}
+
+pre.code.lang-xml .attribute_val {
+	color: #968258;
+}
+
+pre.code.lang-xml .attribute_name {
+	color: #14779d;
+}
+
+pre.code.lang-xml .other {
 }
 
