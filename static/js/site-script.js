@@ -160,19 +160,18 @@ Ecole.BufferUpdater = {
 		var self = this;
 		return Ecole.get('/api/buffer?after=' + self.lastUpdate).next(function (buffers) {
 			buffers.reverse();
-			var deferreds = []
-			for (var i = 0, len = buffers.length; i < len; i++) {
-				var buffer = buffers[i];
+			return loop(buffers.length, function (n) {
+				var buffer = buffers[n];
 				self.lastUpdate = buffer.created_at;
 
 				if (buffer.name == 'NOTIFY') {
 					self.notify(buffer.body);
-					continue;
+					return;
 				}
 
 				if (buffer.name == 'COMMENT') {
 					self.buffers.third.update(buffer);
-					continue;
+					return;
 				}
 
 				var area;
@@ -183,10 +182,9 @@ Ecole.BufferUpdater = {
 					area = self.buffers[self.nextUpdate % self.buffers.length];
 					self.nextUpdate = (self.nextUpdate + 1) % 2;
 				}
-				deferreds.push(area.update(buffer));
 				self.names[buffer.name] = area;
-			}
-			return parallel(deferreds).wait(2).next(function () { return self.update() });
+				return area.update(buffer).wait(0.5);
+			}).wait(2).next(function () { return self.update() });
 		});
 	},
 	notify : function (message) {

@@ -25,9 +25,10 @@ route '/api/buffer', method => GET, action => sub {
 		SELECT * FROM buffer
 		WHERE created_at > datetime(:epoch, 'unixepoch')
 		ORDER BY created_at DESC
-		LIMIT 4
+		LIMIT :limit
 	}, {
 		epoch => $after,
+		limit => $after ? 8 : 50,
 	});
 	$r->json([
 		map {
