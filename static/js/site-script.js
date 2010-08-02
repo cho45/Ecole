@@ -96,6 +96,11 @@ Ecole.BufferUpdater = {
 				var buffer = buffers[i];
 				self.lastUpdate = buffer.created_at;
 
+				if (buffer.name == 'NOTIFY') {
+					self.notify(buffer.body);
+					continue;
+				}
+
 				var area;
 				if (self.names[buffer.name]) {
 					area = self.names[buffer.name];
@@ -108,6 +113,13 @@ Ecole.BufferUpdater = {
 				self.names[buffer.name] = area;
 			}
 			return wait(2).next(function () { self.update() });
+		});
+	},
+	notify : function (message) {
+		$.gritter.add({
+			title : ' ',
+			text  : message,
+			image : 'http://www.st-hatena.com/users/ch/cho45/profile.gif',
 		});
 	}
 };
