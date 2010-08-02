@@ -40,28 +40,34 @@ Ecole.BufferArea.prototype = {
 	},
 
 	update : function (buffer) {
+		var ret  = new Deferred();
 		var self = this;
 		var diffs = (self.buffer && self.buffer.name == buffer.name) ? DMP.diff_main(self.buffer.body, buffer.body) : null;
 		if (buffer.name.indexOf('COMMIT_EDITMSG') != -1) diffs = null;
 
 		self.buffer = buffer;
 		self.$container.fadeOut('fast', function () {
+			self.$container.fadeIn('fast', function () {
+				ret.call();
+			});
+
 			self.$info.text('File: ' + buffer.name + ' ');
 			if (diffs) {
 				var formatted = self.formatDiff(diffs);
 				var changes = formatted.changes;
 				for (var i = 0, len = changes.length; i < len; i++) (function (change) {
 					$('<a class="change">L:' + change + '</a> ').click(function () {
-						self.$pre.scrollTop(px(change + 'em', self.$pre[0]));
+						self.$pre.scrollTop((change - 5) * 12 * 1.33);
 					}).appendTo(self.$info);
 				})(changes[i]);
+				self.$pre.scrollTop((changes[0] - 5) * 12 * 1.33);
 				self.$pre.html(formatted.html);
 			} else {
 				self.$pre.text(buffer.body);
 			}
 			// self.$container.data('highlighter').highlight();
 		});
-		self.$container.fadeIn('fast');
+		return ret;
 	},
 
 	formatDiff : function (diffs) {
@@ -116,6 +122,7 @@ Ecole.BufferUpdater = {
 		var self = this;
 		return Ecole.get('/api/buffer?after=' + self.lastUpdate).next(function (buffers) {
 			buffers.reverse();
+			var deferreds = []
 			for (var i = 0, len = buffers.length; i < len; i++) {
 				var buffer = buffers[i];
 				self.lastUpdate = buffer.created_at;
@@ -133,10 +140,10 @@ Ecole.BufferUpdater = {
 					area = self.buffers[self.nextUpdate % self.buffers.length];
 					self.nextUpdate = (self.nextUpdate + 1) % 2;
 				}
-				area.update(buffer);
+				deferreds.push(area.update(buffer));
 				self.names[buffer.name] = area;
 			}
-			return wait(2).next(function () { self.update() });
+			return parallel(deferreds).wait(2).next(function () { return self.update() });
 		});
 	},
 	notify : function (message) {
@@ -144,6 +151,7 @@ Ecole.BufferUpdater = {
 			title : ' ',
 			text  : message,
 			image : 'http://www.st-hatena.com/users/ch/cho45/profile.gif',
+			time  : 60000
 		});
 	}
 };
