@@ -19,7 +19,7 @@ Ecole.BufferArea.prototype = {
 
 	update : function (buffer) {
 		var self = this;
-		var diffs = self.buffer ? DMP.diff_main(self.buffer.body, buffer.body) : null;
+		var diffs = (self.buffer && self.buffer.name == buffer.name) ? DMP.diff_main(self.buffer.body, buffer.body) : null;
 		self.buffer = buffer;
 		self.$container.fadeOut('fast', function () {
 			self.$info.text('File: ' + buffer.name + ' ');
