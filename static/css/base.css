@@ -14,6 +14,13 @@
 	font-family: monospace;
 }
 
+#buffers .buffer .info a.change {
+	margin: 0 0.5em;
+	cursor: pointer;
+	color: #006666;
+	text-decoration: underline;
+}
+
 #buffers pre {
 	padding: 0 0.5em;
 	overflow: auto;
@@ -140,3 +147,11 @@ pre.code.lang-xml .attribute_name {
 pre.code.lang-xml .other {
 }
 
+pre.code ins {
+	text-decoration: none;
+	background: #ccffcc;
+}
+
+pre.code del {
+	background: #ffcccc;
+}

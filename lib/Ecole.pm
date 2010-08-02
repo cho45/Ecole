@@ -24,8 +24,8 @@ route '/api/buffer', method => GET, action => sub {
 	my $buffers = Ecole::Model->select(q{
 		SELECT * FROM buffer
 		WHERE created_at > datetime(:epoch, 'unixepoch')
-		ORDER BY created_at DESC 
-		LIMIT 2
+		ORDER BY created_at DESC
+		LIMIT 4
 	}, {
 		epoch => $after,
 	});

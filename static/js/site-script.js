@@ -1,4 +1,5 @@
 Deferred.define();
+DMP = new diff_match_patch();
 
 Ecole = {};
 Ecole.API_BASE = '';
@@ -13,16 +14,65 @@ Ecole.BufferArea.prototype = {
 		this.$pre       = this.$container.find('pre');
 		this.$info      = this.$container.find('.info');
 		this.$container.data('highlighter', new Ecole.SyntaxHighlighter(this.$pre[0]));
+		this.buffer     = null;
 	},
 
 	update : function (buffer) {
 		var self = this;
+		var diffs = self.buffer ? DMP.diff_main(self.buffer.body, buffer.body) : null;
+		self.buffer = buffer;
 		self.$container.fadeOut('fast', function () {
-			self.$info.text('File: ' + buffer.name);
-			self.$pre.text(buffer.body);
-			self.$container.data('highlighter').highlight();
+			self.$info.text('File: ' + buffer.name + ' ');
+			if (diffs) {
+				var formatted = self.formatDiff(diffs);
+				var changes = formatted.changes;
+				for (var i = 0, len = changes.length; i < len; i++) (function (change) {
+					$('<a class="change">L:' + change + '</a> ').click(function () {
+						self.$pre.scrollTop(change * 12);
+					}).appendTo(self.$info);
+				})(changes[i]);
+				self.$pre.html(formatted.html);
+			} else {
+				self.$pre.text(buffer.body);
+			}
+			// self.$container.data('highlighter').highlight();
 		});
 		self.$container.fadeIn('fast');
+	},
+
+	formatDiff : function (diffs) {
+		var DIFF_DELETE = -1;
+		var DIFF_INSERT = 1;
+		var DIFF_EQUAL  = 0;
+
+		var changes = [ 0 ];
+		var ret     = [];
+		var line    = 1;
+		for (var i = 0, len = diffs.length; i < len; i++) {
+			var op = diffs[i][0];
+			var dt = diffs[i][1].replace(/[&<>]/g, function (m) { return {'&':'&amp;','<':'&lt;','>':'&gt;'} });
+			switch (op) {
+				case DIFF_INSERT:
+					if (line > changes[changes.length-1]) changes.push(line);
+					ret.push('<ins>', dt, '</ins>');
+					break;
+				case DIFF_DELETE:
+					if (line > changes[changes.length-1]) changes.push(line);
+					ret.push('<del>', dt, '</del>');
+					break;
+				case DIFF_EQUAL:
+					ret.push(dt);
+					break;
+			}
+			diffs[i][1].replace(/\n/g, function (_) { line++; return _ });
+		}
+		
+		changes.shift();
+
+		return {
+			changes : changes,
+			html : ret.join('')
+		};
 	}
 };
 
@@ -57,7 +107,7 @@ Ecole.BufferUpdater = {
 				area.update(buffer);
 				self.names[buffer.name] = area;
 			}
-			return wait(1).next(function () { self.update() });
+			return wait(2).next(function () { self.update() });
 		});
 	}
 };
