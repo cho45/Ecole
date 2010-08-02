@@ -58,12 +58,16 @@ Ecole.BufferArea.prototype = {
 			if (diffs) {
 				var formatted = self.formatDiff(diffs);
 				var changes = formatted.changes;
+
+				var count = 1; self.$pre.text().replace(/\n/g, function (_) { count++; return _ });
+				var lineHeight = self.$pre[0].scrollHeight / count;
+
 				for (var i = 0, len = changes.length; i < len; i++) (function (change) {
 					$('<a class="change">L:' + change + '</a> ').click(function () {
-						self.$pre.scrollTop((change - 5) * 12 * 1.33);
+						self.$pre.scrollTop((change - 5) * lineHeight);
 					}).appendTo(self.$info);
 				})(changes[i]);
-				self.$pre.scrollTop((changes[0] - 5) * 12 * 1.33);
+				self.$pre.scrollTop((changes[0] - 5) * lineHeight);
 				self.$pre.html(formatted.html);
 			} else {
 				self.$pre.text(buffer.body);
