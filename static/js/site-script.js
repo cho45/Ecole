@@ -28,6 +28,9 @@ Ecole.API_BASE = '';
 Ecole.get = function (path) {
 	return $.getJSON(Ecole.API_BASE + path);
 };
+Ecole.post = function (path, params) {
+	return $.post(Ecole.API_BASE + path, params);
+};
 
 Ecole.BufferArea = function () { this.init.apply(this, arguments) };
 Ecole.BufferArea.prototype = {
@@ -106,6 +109,40 @@ Ecole.BufferArea.prototype = {
 	}
 };
 
+Ecole.BufferAreaEditable = function () { this.init.apply(this, arguments) };
+Ecole.BufferAreaEditable.prototype = {
+	init : function (container) {
+		this.$container = $(container);
+		this.$textarea  = this.$container.find('textarea');
+		this.buffer     = null;
+
+		var self = this;
+		var timer;
+		this.$textarea.keypress(function () {
+			if (timer) clearTimeout(timer);
+			timer = setTimeout(function () {
+				self.post();
+			}, 5000);
+		});
+	},
+
+	update : function (buffer) {
+		this.$textarea.val(buffer.body);
+	},
+
+	post : function () {
+		return Ecole.post('/api/buffer', {
+			name : 'COMMENT',
+			body : this.$textarea.val()
+		}).
+		next(function () {
+		}).
+		error(function (e) {
+			alert(e);
+		});
+	}
+};
+
 Ecole.BufferUpdater = {
 	buffers    : [],
 	names      : {},
@@ -115,6 +152,7 @@ Ecole.BufferUpdater = {
 	start : function () {
 		this.buffers.push(new Ecole.BufferArea(document.getElementById('buffer1')));
 		this.buffers.push(new Ecole.BufferArea(document.getElementById('buffer2')));
+		this.buffers.third = new Ecole.BufferAreaEditable(document.getElementById('buffer3'));
 		return this.update();
 	},
 	
@@ -129,6 +167,11 @@ Ecole.BufferUpdater = {
 
 				if (buffer.name == 'NOTIFY') {
 					self.notify(buffer.body);
+					continue;
+				}
+
+				if (buffer.name == 'COMMENT') {
+					self.buffers.third.update(buffer);
 					continue;
 				}
 
