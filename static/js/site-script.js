@@ -18,10 +18,8 @@ Ecole.BufferArea.prototype = {
 	update : function (buffer) {
 		var self = this;
 		self.$container.fadeOut('fast', function () {
-			self.$pre.text(
-				'### File: ' + buffer.name + "\n\n" +
-				buffer.body
-			);
+			self.$info.text('File: ' + buffer.name);
+			self.$pre.text(buffer.body);
 			self.$container.data('highlighter').highlight();
 		});
 		self.$container.fadeIn('fast');

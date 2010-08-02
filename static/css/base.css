@@ -9,6 +9,11 @@
 #buffers .buffer {
 }
 
+#buffers .buffer .info {
+	height: 1em;
+	font-family: monospace;
+}
+
 #buffers pre {
 	padding: 0 0.5em;
 	overflow: auto;
